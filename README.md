@@ -1,4 +1,4 @@
-## Solution Validator for the Board Game
+## Solution Validator for a Board Game
 
 ### Instructions to run the code:
 
