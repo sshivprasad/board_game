@@ -1,4 +1,4 @@
-from models import Board, Cell, Solution
+from models import Board, Solution
 
 
 def is_solution_valid(board: Board, solution: Solution) -> (bool, str):
