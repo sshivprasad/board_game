@@ -49,7 +49,10 @@ class Solution:
 
     def __getitem__(self, cell_pos: tuple):
         row_num, col_num = cell_pos
-        return self._cells[row_num - 1][col_num - 1]
+        try:
+            return self._cells[row_num - 1][col_num - 1]
+        except IndexError:
+            raise ValueError(f'The cell row and col number {row_num, col_num} is invalid')
 
     def _prepare_cell_matrix(self) -> list[list[Cell]]:
         cells = []

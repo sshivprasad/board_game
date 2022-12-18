@@ -43,6 +43,15 @@ class TestSolutionModel(unittest.TestCase):
             Solution(n, entries)
         self.assertEquals(str(ctx.exception), f'The numbers in the cells must be between 1 and {n}')
 
+    def test_invalid_cell_pos_throws_exception(self):
+        n = 2
+        entries = [1, 2, 2, 1]
+        solution = Solution(n, entries)
+        with self.assertRaises(ValueError) as ctx:
+            cell_pos = (3, 1)
+            solution[cell_pos]
+        self.assertEqual(str(ctx.exception), f'The cell row and col number {cell_pos} is invalid')
+
     def test_solution_cell_matrix(self):
         n = 2
         entries = [1, 2, 2, 1]
