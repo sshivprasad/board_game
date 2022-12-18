@@ -1,47 +1,28 @@
-from models import Board, Cell
+from models import Board, Solution
 
 
-def is_solution_valid(board: Board, solution: list[list[Cell]]) -> (bool, str):
+def is_solution_valid(board: Board, solution: Solution) -> (bool, str):
     n = board.n
-    # check if the dimensions of the solution match the board
-    if not all(len(row) == n for row in solution) or len(solution) != n:
-        return False, f'Solution matrix should be of the dimension {n}*{n}'
-    # check if all the numbers in the board are between 1 and n
-    is_within_range = all(0 <= cell.val <= n for row in solution for cell in row)
-    if not is_within_range:
-        return False, f'The numbers in the cells must be between 1 and {n}'
     # check if solution passes all the constraints of the board
     is_within_constraints = board.validate_constraints(solution)
     if not is_within_constraints:
-        return False, f'The solution does not meet the constraints'
+        return False, 'The solution does not meet the constraints'
     # check if the sum of each row is equal to n(n+1)/2
-    is_row_sum_valid = _validate_row_sum(n, solution)
+    is_row_sum_valid = _validate_axis_sum(solution, axis=0)
     if not is_row_sum_valid:
-        return False, f'There is a repeating number in one of the rows'
+        return False, 'There are repeating numbers in the rows'
     # check if the sum of each col is equal to n(n+1)/2
-    is_col_sum_valid = _validate_col_sum(n, solution)
+    is_col_sum_valid = _validate_axis_sum(solution, axis=1)
     if not is_col_sum_valid:
-        return False, f'There is a repeating number in one of the columns'
+        return False, 'There are repeating numbers in the columns'
     return True, 'The solution is Valid.'
 
 
-def _validate_row_sum(n, solution: list[list[Cell]]) -> bool:
-    expected_row_sum = (n * (n + 1)) / 2
-    for row in solution:
-        row_sum = 0
-        for cell in row:
-            row_sum += cell.val
-        if row_sum != expected_row_sum:
-            return False
-    return True
-
-
-def _validate_col_sum(n, solution: list[list[Cell]]) -> bool:
-    expected_col_sum = (n * (n + 1)) / 2
-    for col_idx in range(n):
-        col_sum = 0
-        for row_idx in range(n):
-            col_sum += solution[row_idx][col_idx].val
-        if col_sum != expected_col_sum:
+def _validate_axis_sum(solution: Solution, axis: int) -> bool:
+    n = solution.n
+    expected_sum = (n * (n + 1)) / 2
+    for num in range(1, n + 1):
+        axis_sum = solution.get_row_sum(num) if axis == 0 else solution.get_col_sum(num)
+        if axis_sum != expected_sum:
             return False
     return True

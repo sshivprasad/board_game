@@ -1,40 +1,60 @@
 import unittest
 import validator
-from models import Cell
+from models import Solution, Constraint, Cell, Board
 
 
 class TestValidator(unittest.TestCase):
 
-    def test_row_sum_validator_valid_input(self):
+    def test_axis_sum_validator_row(self):
         n = 2
-        solution = [[Cell(1, 1, 1), Cell(1, 2, 2)],
-                    [Cell(2, 1, 1), Cell(2, 2, 2)],
-                    ]
-        self.assertTrue(validator._validate_row_sum(n, solution),
+        solution = Solution(n, [1, 2, 1, 2])
+        self.assertTrue(validator._validate_axis_sum(solution, axis=0),
                         f'row sum for each row is {(n * (n + 1)) / 2} as expected')
+        solution = Solution(n, [1, 1, 2, 2])
+        self.assertFalse(validator._validate_axis_sum(solution, axis=0), f'row sum is not {(n * (n + 1)) / 2}')
 
-    def test_row_sum_validator_invalid_input(self):
+    def test_axis_sum_validator_col(self):
         n = 2
-        solution = [[Cell(1, 1), Cell(1, 2, 3)],
-                    [Cell(2, 1, 2), Cell(2, 2, 3)],
-                    ]
-        self.assertFalse(validator._validate_row_sum(n, solution), f'row sum is not {(n * (n + 1)) / 2}')
-
-    def test_col_sum_validator_valid_input(self):
-        n = 2
-        solution = [[Cell(1, 1, 1), Cell(1, 2, 3)],
-                    [Cell(2, 1, 2), Cell(2, 2)],
-                    ]
-        self.assertTrue(validator._validate_col_sum(n, solution),
+        solution = Solution(n, [1, 2, 1, 2])
+        self.assertFalse(validator._validate_axis_sum(solution, axis=1), f'col sum is not {(n * (n + 1)) / 2}')
+        solution = Solution(n, [1, 1, 2, 2])
+        self.assertTrue(validator._validate_axis_sum(solution, axis=1),
                         f'col sum for each col is {(n * (n + 1)) / 2} as expected')
 
-    def test_col_sum_validator_invalid_input(self):
-        n = 2
-        solution = [[Cell(1, 1, 1), Cell(1, 2, 2)],
-                    [Cell(2, 1, 1), Cell(2, 2, 2)],
-                    ]
-        self.assertFalse(validator._validate_col_sum(n, solution), f'col sum is not {(n * (n + 1)) / 2}')
+    def test_validator_returns_false_for_not_meeting_constraints(self):
+        n = 4
+        board = Board(n, [Constraint(Cell(1, 1), '>', Cell(1, 2)),
+                          Constraint(Cell(4, 1), '>', Cell(4, 2)),
+                          Constraint(Cell(3, 2), '<', Cell(4, 2)),
+                          Constraint(Cell(2, 3), '>', Cell(3, 3)),
+                          ]
+                      )
+        solution = Solution(n, [1, 2, 3, 4, 2, 3, 4, 1, 3, 4, 1, 2, 4, 1, 2, 3])
+        self.assertEqual(validator.is_solution_valid(board, solution),
+                         (False, 'The solution does not meet the constraints'))
 
-    def test_solution_validator_incorrect_dimension(self):
-        # TODO what if user enters two values for the same row and col idx
-        pass
+    def test_validator_returns_false_for_repeating_number_along_row(self):
+        n = 2
+        board = Board(n, [Constraint(Cell(1, 1), '>', Cell(2, 1))])
+        solution = Solution(n, [2, 2, 1, 1])
+        self.assertEqual(validator.is_solution_valid(board, solution),
+                         (False, 'There are repeating numbers in the rows'))
+
+    def test_validator_returns_false_for_repeating_number_along_col(self):
+        n = 2
+        board = Board(n, [Constraint(Cell(1, 1), '<', Cell(1, 2))])
+        solution = Solution(n, [1, 2, 1, 2])
+        self.assertEqual(validator.is_solution_valid(board, solution),
+                         (False, 'There are repeating numbers in the columns'))
+
+    def test_validator_returns_true_for_valid_solution(self):
+        n = 4
+        board = Board(n, [Constraint(Cell(1, 1), '>', Cell(1, 2)),
+                          Constraint(Cell(4, 1), '>', Cell(4, 2)),
+                          Constraint(Cell(3, 2), '<', Cell(4, 2)),
+                          Constraint(Cell(2, 3), '>', Cell(3, 3)),
+                          ]
+                      )
+        solution = Solution(n, [2, 1, 4, 3, 1, 4, 3, 2, 3, 2, 1, 4, 4, 3, 2, 1])
+        self.assertEqual(validator.is_solution_valid(board, solution),
+                         (True, 'The solution is Valid.'))
